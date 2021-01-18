@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  whitenoise:
+    image: whitenoise
+    container_name: whitenoise
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      SONOS_API_IP: ${SONOS_API_IP}
+    restart: always

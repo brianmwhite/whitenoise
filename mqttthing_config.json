@@ -1,0 +1,30 @@
+[
+    {
+        "type": "switch",
+        "name": "Owen's White Noise",
+        "topics": {
+            "getOn": "home/owensroom/switches/whitenoise/getOn",
+            "setOn": "home/owensroom/switches/whitenoise/setOn"
+        },
+        "confirmationPeriodms": 1000,
+        "confirmationIndicateOffline": true,
+        "integerValue": false,
+        "onValue": "ON",
+        "offValue": "OFF",
+        "accessory": "mqttthing"
+    },
+    {
+        "type": "switch",
+        "name": "Bedroom White Noise",
+        "topics": {
+            "getOn": "home/bedroom/switches/whitenoise/getOn",
+            "setOn": "home/bedroom/switches/whitenoise/setOn"
+        },
+        "confirmationPeriodms": 1000,
+        "confirmationIndicateOffline": true,
+        "integerValue": false,
+        "onValue": "ON",
+        "offValue": "OFF",
+        "accessory": "mqttthing"
+    }
+]
