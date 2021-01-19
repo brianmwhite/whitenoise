@@ -97,23 +97,18 @@ def turnOnWhiteNoise(room, showPrint = False):
 	if showPrint:
 		print(f"turning {room} whitenoise ON ....")
 
+def update_status_action(speaker, room):
+	if sonos_control.sonos_whitenoise_is_on(speaker):
+		client.publish(MQTT_GETON_PATH.format(room),ON_VALUE)
+	else:
+		client.publish(MQTT_GETON_PATH.format(room),OFF_VALUE)
+
 def update_status():
 	global last_time_status_check_in
 	
-	if sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_BEDROOM):
-		client.publish(MQTT_GETON_PATH.format(BEDROOM_VALUE),ON_VALUE)
-	else:
-		client.publish(MQTT_GETON_PATH.format(BEDROOM_VALUE),OFF_VALUE)
-
-	if sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OWENS_ROOM):
-		client.publish(MQTT_GETON_PATH.format(OWENSROOM_VALUE),ON_VALUE)
-	else:
-		client.publish(MQTT_GETON_PATH.format(OWENSROOM_VALUE),OFF_VALUE)
-
-	if sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OFFICE):
-		client.publish(MQTT_GETON_PATH.format(OFFICE_VALUE),ON_VALUE)
-	else:
-		client.publish(MQTT_GETON_PATH.format(OFFICE_VALUE),OFF_VALUE)
+	update_status_action(sonos_control.SONOS_BEDROOM, BEDROOM_VALUE)
+	update_status_action(sonos_control.SONOS_OFFICE, OFFICE_VALUE)
+	update_status_action(sonos_control.SONOS_OWENS_ROOM, OWENSROOM_VALUE)
 
 	last_time_status_check_in = time.monotonic()
 
