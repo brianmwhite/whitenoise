@@ -26,5 +26,19 @@
         "onValue": "ON",
         "offValue": "OFF",
         "accessory": "mqttthing"
+    },
+    {
+        "type": "switch",
+        "name": "Office White Noise",
+        "topics": {
+            "getOn": "home/office/switches/whitenoise/getOn",
+            "setOn": "home/office/switches/whitenoise/setOn"
+        },
+        "confirmationPeriodms": 1000,
+        "confirmationIndicateOffline": true,
+        "integerValue": false,
+        "onValue": "ON",
+        "offValue": "OFF",
+        "accessory": "mqttthing"
     }
 ]
