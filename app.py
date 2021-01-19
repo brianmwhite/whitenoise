@@ -5,6 +5,7 @@ import sonos_control
 
 owens_room_white_noise_is_on = False
 bedroom_white_noise_is_on = False
+office_white_noise_is_on = False
 
 last_time_status_check_in = 0
 status_checkin_delay = 60.0
@@ -21,6 +22,7 @@ def on_connect(client, userdata, flags, rc):
 	client.subscribe("$SYS/#")
 	client.subscribe("home/owensroom/switches/whitenoise/setOn")
 	client.subscribe("home/bedroom/switches/whitenoise/setOn")
+	client.subscribe("home/office/switches/whitenoise/setOn")
 
 def on_disconnect(client, userdata, rc):
     print("MQTT: disconnecting reason " + str(rc))
@@ -31,6 +33,8 @@ def on_message(client, userdata, message):
 		message_whitenoise("bedroom", message)
 	elif message.topic == "home/owensroom/switches/whitenoise/setOn":
 		message_whitenoise("owensroom", message)
+	elif message.topic == "home/office/switches/whitenoise/setOn":
+		message_whitenoise("office", message)
 
 def message_whitenoise(room, message):
 	global last_time_status_check_in
@@ -49,6 +53,7 @@ def message_whitenoise(room, message):
 def turnOffWhiteNoise(room, showPrint = False):
 	global bedroom_white_noise_is_on
 	global owens_room_white_noise_is_on
+	global office_white_noise_is_on
 	
 	if room == "bedroom":
 		bedroom_white_noise_is_on = False
@@ -56,6 +61,9 @@ def turnOffWhiteNoise(room, showPrint = False):
 	elif room == "owensroom":
 		owens_room_white_noise_is_on = False
 		sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OWENS_ROOM)
+	elif room == "office":
+		office_white_noise_is_on = False
+		sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OFFICE)
 	
 	if showPrint:
 		print(f"turning {room} whitenoise OFF ....")
@@ -63,6 +71,7 @@ def turnOffWhiteNoise(room, showPrint = False):
 def turnOnWhiteNoise(room, showPrint = False):
 	global bedroom_white_noise_is_on
 	global owens_room_white_noise_is_on
+	global office_white_noise_is_on
 	
 	if room == "bedroom":
 		bedroom_white_noise_is_on = True
@@ -70,12 +79,16 @@ def turnOnWhiteNoise(room, showPrint = False):
 	elif room == "owensroom":
 		owens_room_white_noise_is_on = True
 		sonos_control.sonos_whitenoise_start(sonos_control.SONOS_OWENS_ROOM, 60)
-	
+	elif room == "office":
+		office_white_noise_is_on = True
+		sonos_control.sonos_whitenoise_start(sonos_control.SONOS_OFFICE)
+
 	if showPrint:
 		print(f"turning {room} whitenoise ON ....")
 
 def update_status():
 	global last_time_status_check_in
+	
 	bedroom_whitenoise_is_on = sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_BEDROOM)
 
 	if bedroom_whitenoise_is_on:
@@ -89,6 +102,14 @@ def update_status():
 		client.publish("home/owensroom/switches/whitenoise/getOn","ON")
 	else:
 		client.publish("home/owensroom/switches/whitenoise/getOn","OFF")
+
+	office_whitenoise_is_on = sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OFFICE)
+
+	if office_whitenoise_is_on:
+		client.publish("home/office/switches/whitenoise/getOn","ON")
+	else:
+		client.publish("home/office/switches/whitenoise/getOn","OFF")
+
 
 	last_time_status_check_in = time.monotonic()
 
