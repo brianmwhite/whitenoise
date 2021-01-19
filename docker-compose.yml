@@ -9,4 +9,6 @@ services:
       dockerfile: ./Dockerfile
     environment:
       SONOS_API_IP: ${SONOS_API_IP}
+      MQTT_HOST: ${MQTT_HOST}
+      MQTT_PORT: ${MQTT_PORT}
     restart: always
