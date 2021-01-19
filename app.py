@@ -13,6 +13,16 @@ status_checkin_delay = 60.0
 MQTT_HOST = "192.168.7.97"
 MQTT_PORT = 1883
 
+MQTT_SETON_PATH = "home/{0}/switches/whitenoise/setOn"
+MQTT_GETON_PATH = "home/{0}/switches/whitenoise/getOn"
+
+BEDROOM_VALUE = "bedroom"
+OFFICE_VALUE = "office"
+OWENSROOM_VALUE = "owensroom"
+
+ON_VALUE = "ON"
+OFF_VALUE = "OFF"
+
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
 	print("MQTT: Connected with result code "+str(rc))
@@ -20,21 +30,21 @@ def on_connect(client, userdata, flags, rc):
 	# Subscribing in on_connect() means that if we lose the connection and
 	# reconnect then subscriptions will be renewed.
 	client.subscribe("$SYS/#")
-	client.subscribe("home/owensroom/switches/whitenoise/setOn")
-	client.subscribe("home/bedroom/switches/whitenoise/setOn")
-	client.subscribe("home/office/switches/whitenoise/setOn")
+	client.subscribe(MQTT_SETON_PATH.format(OWENSROOM_VALUE))
+	client.subscribe(MQTT_SETON_PATH.format(BEDROOM_VALUE))
+	client.subscribe(MQTT_SETON_PATH.format(OFFICE_VALUE))
 
 def on_disconnect(client, userdata, rc):
     print("MQTT: disconnecting reason " + str(rc))
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, message):
-	if message.topic == "home/bedroom/switches/whitenoise/setOn":
-		message_whitenoise("bedroom", message)
-	elif message.topic == "home/owensroom/switches/whitenoise/setOn":
-		message_whitenoise("owensroom", message)
-	elif message.topic == "home/office/switches/whitenoise/setOn":
-		message_whitenoise("office", message)
+	if message.topic == MQTT_SETON_PATH.format(BEDROOM_VALUE):
+		message_whitenoise(BEDROOM_VALUE, message)
+	elif message.topic == MQTT_SETON_PATH.format(OWENSROOM_VALUE):
+		message_whitenoise(OWENSROOM_VALUE, message)
+	elif message.topic == MQTT_SETON_PATH.format(OFFICE_VALUE):
+		message_whitenoise(OFFICE_VALUE, message)
 
 def message_whitenoise(room, message):
 	global last_time_status_check_in
@@ -43,25 +53,25 @@ def message_whitenoise(room, message):
 	repeat_command_last_timestamp = time.monotonic() + 5
 	last_time_status_check_in = time.monotonic()
 
-	if str(message.payload.decode("utf-8")) == "ON":
+	if str(message.payload.decode("utf-8")) == ON_VALUE:
 		turnOnWhiteNoise(room, showPrint=True)
-		client.publish(f"home/{room}/switches/whitenoise/getOn","ON")
-	elif str(message.payload.decode("utf-8")) == "OFF":
+		client.publish(MQTT_GETON_PATH.format(room),ON_VALUE)
+	elif str(message.payload.decode("utf-8")) == OFF_VALUE:
 		turnOffWhiteNoise(room, showPrint=True)
-		client.publish(f"home/{room}/switches/whitenoise/getOn","OFF")
+		client.publish(MQTT_GETON_PATH.format(room),OFF_VALUE)
 
 def turnOffWhiteNoise(room, showPrint = False):
 	global bedroom_white_noise_is_on
 	global owens_room_white_noise_is_on
 	global office_white_noise_is_on
 	
-	if room == "bedroom":
+	if room == BEDROOM_VALUE:
 		bedroom_white_noise_is_on = False
 		sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_BEDROOM)
-	elif room == "owensroom":
+	elif room == OWENSROOM_VALUE:
 		owens_room_white_noise_is_on = False
 		sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OWENS_ROOM)
-	elif room == "office":
+	elif room == OFFICE_VALUE:
 		office_white_noise_is_on = False
 		sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OFFICE)
 	
@@ -73,13 +83,13 @@ def turnOnWhiteNoise(room, showPrint = False):
 	global owens_room_white_noise_is_on
 	global office_white_noise_is_on
 	
-	if room == "bedroom":
+	if room == BEDROOM_VALUE:
 		bedroom_white_noise_is_on = True
 		sonos_control.sonos_whitenoise_start(sonos_control.SONOS_BEDROOM)
-	elif room == "owensroom":
+	elif room == OWENSROOM_VALUE:
 		owens_room_white_noise_is_on = True
 		sonos_control.sonos_whitenoise_start(sonos_control.SONOS_OWENS_ROOM, 60)
-	elif room == "office":
+	elif room == OFFICE_VALUE:
 		office_white_noise_is_on = True
 		sonos_control.sonos_whitenoise_start(sonos_control.SONOS_OFFICE)
 
@@ -89,27 +99,20 @@ def turnOnWhiteNoise(room, showPrint = False):
 def update_status():
 	global last_time_status_check_in
 	
-	bedroom_whitenoise_is_on = sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_BEDROOM)
-
-	if bedroom_whitenoise_is_on:
-		client.publish("home/bedroom/switches/whitenoise/getOn","ON")
+	if sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_BEDROOM):
+		client.publish(MQTT_GETON_PATH.format(BEDROOM_VALUE),ON_VALUE)
 	else:
-		client.publish("home/bedroom/switches/whitenoise/getOn","OFF")
+		client.publish(MQTT_GETON_PATH.format(BEDROOM_VALUE),OFF_VALUE)
 
-	owens_whitenoise_is_on = sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OWENS_ROOM)
-
-	if owens_whitenoise_is_on:
-		client.publish("home/owensroom/switches/whitenoise/getOn","ON")
+	if sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OWENS_ROOM):
+		client.publish(MQTT_GETON_PATH.format(OWENSROOM_VALUE),ON_VALUE)
 	else:
-		client.publish("home/owensroom/switches/whitenoise/getOn","OFF")
+		client.publish(MQTT_GETON_PATH.format(OWENSROOM_VALUE),OFF_VALUE)
 
-	office_whitenoise_is_on = sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OFFICE)
-
-	if office_whitenoise_is_on:
-		client.publish("home/office/switches/whitenoise/getOn","ON")
+	if sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OFFICE):
+		client.publish(MQTT_GETON_PATH.format(OFFICE_VALUE),ON_VALUE)
 	else:
-		client.publish("home/office/switches/whitenoise/getOn","OFF")
-
+		client.publish(MQTT_GETON_PATH.format(OFFICE_VALUE),OFF_VALUE)
 
 	last_time_status_check_in = time.monotonic()
 
