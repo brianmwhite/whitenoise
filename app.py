@@ -9,6 +9,9 @@ bedroom_white_noise_is_on = False
 last_time_status_check_in = 0
 status_checkin_delay = 60.0
 
+MQTT_HOST = "192.168.7.97"
+MQTT_PORT = 1883
+
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
 	print("MQTT: Connected with result code "+str(rc))
@@ -49,10 +52,10 @@ def turnOffWhiteNoise(room, showPrint = False):
 	
 	if room == "bedroom":
 		bedroom_white_noise_is_on = False
-		sonos_control.sonos_wake_bedroom()
+		sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_BEDROOM)
 	elif room == "owensroom":
 		owens_room_white_noise_is_on = False
-		sonos_control.sonos_wake_owen()
+		sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OWENS_ROOM)
 	
 	if showPrint:
 		print(f"turning {room} whitenoise OFF ....")
@@ -63,26 +66,26 @@ def turnOnWhiteNoise(room, showPrint = False):
 	
 	if room == "bedroom":
 		bedroom_white_noise_is_on = True
-		sonos_control.sonos_sleep_bedroom()
+		sonos_control.sonos_whitenoise_start(sonos_control.SONOS_BEDROOM)
 	elif room == "owensroom":
 		owens_room_white_noise_is_on = True
-		sonos_control.sonos_sleep_owen()
+		sonos_control.sonos_whitenoise_start(sonos_control.SONOS_OWENS_ROOM, 60)
 	
 	if showPrint:
 		print(f"turning {room} whitenoise ON ....")
 
 def update_status():
 	global last_time_status_check_in
-	bedroom_state = sonos_control.sonos_get_white_noise_state_bedroom()
+	bedroom_whitenoise_is_on = sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_BEDROOM)
 
-	if bedroom_state == '{"white_noise_on":true}':
+	if bedroom_whitenoise_is_on:
 		client.publish("home/bedroom/switches/whitenoise/getOn","ON")
 	else:
 		client.publish("home/bedroom/switches/whitenoise/getOn","OFF")
 
-	owensroom_state = sonos_control.sonos_get_white_noise_state_owen()
+	owens_whitenoise_is_on = sonos_control.sonos_whitenoise_is_on(sonos_control.SONOS_OWENS_ROOM)
 
-	if owensroom_state == '{"white_noise_on":true}':
+	if owens_whitenoise_is_on:
 		client.publish("home/owensroom/switches/whitenoise/getOn","ON")
 	else:
 		client.publish("home/owensroom/switches/whitenoise/getOn","OFF")
@@ -94,7 +97,7 @@ client.on_connect = on_connect
 client.on_disconnect = on_disconnect
 client.on_message = on_message
 
-client.connect("192.168.7.97", 1883, 60)
+client.connect(MQTT_HOST, MQTT_PORT, 60)
 
 update_status()
 
