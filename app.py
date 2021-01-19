@@ -1,4 +1,5 @@
 import os
+import signal
 import time
 import random
 import paho.mqtt.client as mqtt
@@ -23,6 +24,15 @@ OWENSROOM_VALUE = "owensroom"
 
 ON_VALUE = "ON"
 OFF_VALUE = "OFF"
+
+class exit_monitor_setup:
+  exit_now_flag_raised = False
+  def __init__(self):
+    signal.signal(signal.SIGINT, self.exit_gracefully)
+    signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+  def exit_gracefully(self,signum, frame):
+    self.exit_now_flag_raised = True
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -112,22 +122,23 @@ def update_status():
 
 	last_time_status_check_in = time.monotonic()
 
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_disconnect = on_disconnect
-client.on_message = on_message
+if __name__ == '__main__':
+	exit_monitor = exit_monitor_setup()
 
-client.connect(MQTT_HOST, MQTT_PORT, 60)
+	client = mqtt.Client()
+	client.on_connect = on_connect
+	client.on_disconnect = on_disconnect
+	client.on_message = on_message
 
-update_status()
+	client.connect(MQTT_HOST, MQTT_PORT, 60)
 
-client.loop_start()
-# see below, not sure if sleep is needed here, probably not
-time.sleep(0.001)
+	update_status()
 
-try:
-
-	while True:
+	client.loop_start()
+	# see below, not sure if sleep is needed here, probably not
+	time.sleep(0.001)
+  
+	while not exit_monitor.exit_now_flag_raised:
 		# added time.sleep 1 ms after seeing 100% CPU usage
 		# found this solution https://stackoverflow.com/a/41749754
 		time.sleep(0.001)
@@ -135,8 +146,6 @@ try:
 		if current_seconds_count - last_time_status_check_in > status_checkin_delay:
 			update_status()
 
-except KeyboardInterrupt:
-	pass
-
-client.loop_stop()
-client.disconnect()
+	client.loop_stop()
+	client.disconnect()
+	print("white noise service ended")
