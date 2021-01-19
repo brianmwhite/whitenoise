@@ -40,13 +40,13 @@ def on_disconnect(client, userdata, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, message):
 	if message.topic == MQTT_SETON_PATH.format(BEDROOM_VALUE):
-		message_whitenoise(BEDROOM_VALUE, message)
+		whitenoise_message_response_action(BEDROOM_VALUE, message)
 	elif message.topic == MQTT_SETON_PATH.format(OWENSROOM_VALUE):
-		message_whitenoise(OWENSROOM_VALUE, message)
+		whitenoise_message_response_action(OWENSROOM_VALUE, message)
 	elif message.topic == MQTT_SETON_PATH.format(OFFICE_VALUE):
-		message_whitenoise(OFFICE_VALUE, message)
+		whitenoise_message_response_action(OFFICE_VALUE, message)
 
-def message_whitenoise(room, message):
+def whitenoise_message_response_action(room, message):
 	global last_time_status_check_in
 	global repeat_command_last_timestamp
 	
