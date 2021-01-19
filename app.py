@@ -10,8 +10,8 @@ office_white_noise_is_on = False
 last_time_status_check_in = 0
 status_checkin_delay = 60.0
 
-MQTT_HOST = "192.168.7.97"
-MQTT_PORT = 1883
+MQTT_HOST = os.environ["MQTT_HOST"]
+MQTT_PORT = int(os.environ["MQTT_PORT"])
 
 MQTT_SETON_PATH = "home/{0}/switches/whitenoise/setOn"
 MQTT_GETON_PATH = "home/{0}/switches/whitenoise/getOn"
