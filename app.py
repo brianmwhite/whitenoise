@@ -8,6 +8,8 @@ import sonos_control
 owens_room_white_noise_is_on = False
 bedroom_white_noise_is_on = False
 office_white_noise_is_on = False
+livingroom_white_noise_is_on = False
+basement_white_noise_is_on = False
 
 last_time_status_check_in = 0
 status_checkin_delay = 60.0
@@ -21,6 +23,8 @@ MQTT_GETON_PATH = "home/{0}/switches/whitenoise/getOn"
 BEDROOM_VALUE = "bedroom"
 OFFICE_VALUE = "office"
 OWENSROOM_VALUE = "owensroom"
+LIVINGROOM_VALUE = "livingroom"
+BASEMENT_VALUE = "basement"
 
 ON_VALUE = "ON"
 OFF_VALUE = "OFF"
@@ -46,6 +50,8 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_SETON_PATH.format(OWENSROOM_VALUE))
     client.subscribe(MQTT_SETON_PATH.format(BEDROOM_VALUE))
     client.subscribe(MQTT_SETON_PATH.format(OFFICE_VALUE))
+    client.subscribe(MQTT_SETON_PATH.format(LIVINGROOM_VALUE))
+    client.subscribe(MQTT_SETON_PATH.format(BASEMENT_VALUE))
 
 
 def on_disconnect(client, userdata, rc):
@@ -59,6 +65,10 @@ def on_message(client, userdata, message):
         whitenoise_message_response_action(OWENSROOM_VALUE, message)
     elif message.topic == MQTT_SETON_PATH.format(OFFICE_VALUE):
         whitenoise_message_response_action(OFFICE_VALUE, message)
+    elif message.topic == MQTT_SETON_PATH.format(LIVINGROOM_VALUE):
+        whitenoise_message_response_action(LIVINGROOM_VALUE, message)
+    elif message.topic == MQTT_SETON_PATH.format(BASEMENT_VALUE):
+        whitenoise_message_response_action(BASEMENT_VALUE, message)
 
 
 def whitenoise_message_response_action(room, message):
@@ -80,6 +90,8 @@ def turnOffWhiteNoise(room, showPrint=False):
     global bedroom_white_noise_is_on
     global owens_room_white_noise_is_on
     global office_white_noise_is_on
+    global livingroom_white_noise_is_on
+    global basement_white_noise_is_on
 
     if room == BEDROOM_VALUE:
         bedroom_white_noise_is_on = False
@@ -90,6 +102,12 @@ def turnOffWhiteNoise(room, showPrint=False):
     elif room == OFFICE_VALUE:
         office_white_noise_is_on = False
         sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OFFICE)
+    elif room == LIVINGROOM_VALUE:
+        livingroom_white_noise_is_on = False
+        sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_LIVINGROOM)
+    elif room == BASEMENT_VALUE:
+        basement_white_noise_is_on = False
+        sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_BASEMENT)
 
     if showPrint:
         print(f"turning {room} whitenoise OFF ....")
@@ -99,6 +117,8 @@ def turnOnWhiteNoise(room, showPrint=False):
     global bedroom_white_noise_is_on
     global owens_room_white_noise_is_on
     global office_white_noise_is_on
+    global livingroom_white_noise_is_on
+    global basement_white_noise_is_on
 
     if room == BEDROOM_VALUE:
         bedroom_white_noise_is_on = True
@@ -110,6 +130,12 @@ def turnOnWhiteNoise(room, showPrint=False):
     elif room == OFFICE_VALUE:
         office_white_noise_is_on = True
         sonos_control.sonos_whitenoise_start(sonos_control.SONOS_OFFICE)
+    elif room == LIVINGROOM_VALUE:
+        livingroom_white_noise_is_on = True
+        sonos_control.sonos_whitenoise_start(sonos_control.SONOS_LIVINGROOM)
+    elif room == BASEMENT_VALUE:
+        basement_white_noise_is_on = True
+        sonos_control.sonos_whitenoise_start(sonos_control.SONOS_BASEMENT)
 
     if showPrint:
         print(f"turning {room} whitenoise ON ....")
@@ -128,6 +154,8 @@ def update_status():
     update_status_action(sonos_control.SONOS_BEDROOM, BEDROOM_VALUE)
     update_status_action(sonos_control.SONOS_OFFICE, OFFICE_VALUE)
     update_status_action(sonos_control.SONOS_OWENS_ROOM, OWENSROOM_VALUE)
+    update_status_action(sonos_control.SONOS_LIVINGROOM, LIVINGROOM_VALUE)
+    update_status_action(sonos_control.SONOS_BASEMENT, BASEMENT_VALUE)
 
     last_time_status_check_in = time.monotonic()
 
