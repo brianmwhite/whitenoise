@@ -40,5 +40,34 @@
         "onValue": "ON",
         "offValue": "OFF",
         "accessory": "mqttthing"
+    },
+    {
+        "type": "switch",
+        "name": "Living Room White Noise",
+        "topics": {
+            "getOn": "home/livingroom/switches/whitenoise/getOn",
+            "setOn": "home/livingroom/switches/whitenoise/setOn"
+        },
+        "confirmationPeriodms": 1000,
+        "confirmationIndicateOffline": true,
+        "integerValue": false,
+        "onValue": "ON",
+        "offValue": "OFF",
+        "accessory": "mqttthing"
+    },
+    {
+        "type": "switch",
+        "name": "Downstairs White Noise",
+        "topics": {
+            "getOn": "home/basement/switches/whitenoise/getOn",
+            "setOn": "home/basement/switches/whitenoise/setOn"
+        },
+        "confirmationPeriodms": 1000,
+        "confirmationIndicateOffline": true,
+        "integerValue": false,
+        "onValue": "ON",
+        "offValue": "OFF",
+        "accessory": "mqttthing"
     }
+
 ]
