@@ -11,6 +11,8 @@ SONOS_OWENS_ROOM = "Owen%E2%80%99s%20Room"
 SONOS_BEDROOM = "Bedroom"
 SONOS_LIVINGROOM = "Living%20Room"
 SONOS_OFFICE = "Office"
+SONOS_BASEMENT = "Downstairs"
+
 WHITE_NOISE_TRACK_TITLE = "Beach with Cross Fade"
 
 def sonos_api_call(action, url):
