@@ -73,9 +73,6 @@ def on_message(client, userdata, message):
 
 def whitenoise_message_response_action(room, message):
     global last_time_status_check_in
-    global repeat_command_last_timestamp
-
-    repeat_command_last_timestamp = time.monotonic() + 5
     last_time_status_check_in = time.monotonic()
 
     if str(message.payload.decode("utf-8")) == ON_VALUE:
