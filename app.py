@@ -1,18 +1,15 @@
 import os
 import signal
 import time
-import random
 import paho.mqtt.client as mqtt
 import sonos_control
-
-owens_room_white_noise_is_on = False
-bedroom_white_noise_is_on = False
-office_white_noise_is_on = False
-livingroom_white_noise_is_on = False
-basement_white_noise_is_on = False
+import pickle
 
 last_time_status_check_in = 0
 status_checkin_delay = 60.0
+
+PICKLE_FILE_LOCATION = "whitenoise.pickle"
+
 
 MQTT_HOST = os.environ["MQTT_HOST"]
 MQTT_PORT = int(os.environ["MQTT_PORT"])
@@ -25,6 +22,22 @@ OFFICE_VALUE = "office"
 OWENSROOM_VALUE = "owensroom"
 LIVINGROOM_VALUE = "livingroom"
 BASEMENT_VALUE = "basement"
+
+white_noise_is_on_state = {
+    BEDROOM_VALUE: False,
+    OFFICE_VALUE: False,
+    OWENSROOM_VALUE: False,
+    LIVINGROOM_VALUE: False,
+    BASEMENT_VALUE: False
+}
+
+sonos_mapping = {
+    BEDROOM_VALUE: sonos_control.SONOS_BEDROOM,
+    OFFICE_VALUE: sonos_control.SONOS_OFFICE,
+    OWENSROOM_VALUE: sonos_control.SONOS_OWENS_ROOM,
+    LIVINGROOM_VALUE: sonos_control.SONOS_LIVINGROOM,
+    BASEMENT_VALUE: sonos_control.SONOS_BASEMENT
+}
 
 ON_VALUE = "ON"
 OFF_VALUE = "OFF"
@@ -41,8 +54,10 @@ class exit_monitor_setup:
         self.exit_now_flag_raised = True
 
 # The callback for when the client receives a CONNACK response from the server.
+
+
 def on_connect(client, userdata, flags, rc):
-    print("MQTT: Connected with result code "+str(rc))
+    print("MQTT: Connected with result code " + str(rc))
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
@@ -58,6 +73,8 @@ def on_disconnect(client, userdata, rc):
     print("MQTT: disconnecting reason " + str(rc))
 
 # The callback for when a PUBLISH message is received from the server.
+
+
 def on_message(client, userdata, message):
     if message.topic == MQTT_SETON_PATH.format(BEDROOM_VALUE):
         whitenoise_message_response_action(BEDROOM_VALUE, message)
@@ -82,57 +99,33 @@ def whitenoise_message_response_action(room, message):
         turnOffWhiteNoise(room, showPrint=True)
         client.publish(MQTT_GETON_PATH.format(room), OFF_VALUE)
 
+    try:
+        with open(PICKLE_FILE_LOCATION, 'wb') as datafile:
+            pickle.dump(white_noise_is_on_state, datafile)
+            print("saved whitenoise state")
+    except Exception:
+        pass
+
 
 def turnOffWhiteNoise(room, showPrint=False):
-    global bedroom_white_noise_is_on
-    global owens_room_white_noise_is_on
-    global office_white_noise_is_on
-    global livingroom_white_noise_is_on
-    global basement_white_noise_is_on
+    global white_noise_is_on_state
 
-    if room == BEDROOM_VALUE:
-        bedroom_white_noise_is_on = False
-        sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_BEDROOM)
-    elif room == OWENSROOM_VALUE:
-        owens_room_white_noise_is_on = False
-        sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OWENS_ROOM)
-    elif room == OFFICE_VALUE:
-        office_white_noise_is_on = False
-        sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_OFFICE)
-    elif room == LIVINGROOM_VALUE:
-        livingroom_white_noise_is_on = False
-        sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_LIVINGROOM)
-    elif room == BASEMENT_VALUE:
-        basement_white_noise_is_on = False
-        sonos_control.sonos_whitenoise_stop(sonos_control.SONOS_BASEMENT)
+    white_noise_is_on_state[room] = False
+    sonos_control.sonos_whitenoise_stop(sonos_mapping[room])
 
     if showPrint:
         print(f"turning {room} whitenoise OFF ....")
 
 
 def turnOnWhiteNoise(room, showPrint=False):
-    global bedroom_white_noise_is_on
-    global owens_room_white_noise_is_on
-    global office_white_noise_is_on
-    global livingroom_white_noise_is_on
-    global basement_white_noise_is_on
+    global white_noise_is_on_state
 
-    if room == BEDROOM_VALUE:
-        bedroom_white_noise_is_on = True
-        sonos_control.sonos_whitenoise_start(sonos_control.SONOS_BEDROOM)
-    elif room == OWENSROOM_VALUE:
-        owens_room_white_noise_is_on = True
-        sonos_control.sonos_whitenoise_start(
-            sonos_control.SONOS_OWENS_ROOM, 60)
-    elif room == OFFICE_VALUE:
-        office_white_noise_is_on = True
-        sonos_control.sonos_whitenoise_start(sonos_control.SONOS_OFFICE)
-    elif room == LIVINGROOM_VALUE:
-        livingroom_white_noise_is_on = True
-        sonos_control.sonos_whitenoise_start(sonos_control.SONOS_LIVINGROOM)
-    elif room == BASEMENT_VALUE:
-        basement_white_noise_is_on = True
-        sonos_control.sonos_whitenoise_start(sonos_control.SONOS_BASEMENT)
+    white_noise_is_on_state[room] = True
+
+    if room == OWENSROOM_VALUE:
+        sonos_control.sonos_whitenoise_start(sonos_mapping[room], 60)
+    else:
+        sonos_control.sonos_whitenoise_start(sonos_mapping[room])
 
     if showPrint:
         print(f"turning {room} whitenoise ON ....")
@@ -159,6 +152,17 @@ def update_status():
 
 if __name__ == '__main__':
     exit_monitor = exit_monitor_setup()
+
+    try:
+        with open(PICKLE_FILE_LOCATION, 'rb') as datafile:
+            white_noise_is_on_state = pickle.load(datafile)
+            print("loaded whitenoise state")
+    except (FileNotFoundError, pickle.UnpicklingError):
+        print("failed to load whitenoise state, default=OFF")
+        pass
+
+    # for each dictionary item
+    # if true, call whitenoise on
 
     client = mqtt.Client()
     client.on_connect = on_connect
