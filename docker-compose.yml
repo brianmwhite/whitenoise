@@ -13,6 +13,6 @@ services:
       MQTT_PORT: ${MQTT_PORT}
     restart: always
     volumes:
-      - whitenoise_data:/home/pi/whitenoise/config
-volumes:
-  whitenoise_data:
+      - type: volumes
+        source: ./config
+        target: /app/config
