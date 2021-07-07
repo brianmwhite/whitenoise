@@ -1,21 +1,25 @@
 import os
+import pickle
 import signal
 import time
+
 import paho.mqtt.client as mqtt
+
 import sonos_control
-import pickle
 
 last_time_status_check_in = 0
 status_checkin_delay = 60.0
 
 PICKLE_FILE_LOCATION = "whitenoise.pickle"
 
-
 MQTT_HOST = os.environ["MQTT_HOST"]
 MQTT_PORT = int(os.environ["MQTT_PORT"])
 
 MQTT_SETON_PATH = "home/{0}/switches/whitenoise/setOn"
 MQTT_GETON_PATH = "home/{0}/switches/whitenoise/getOn"
+
+MQTT_GETONLINE_PATH = "home/{0}/switches/whitenoise/getOnline"
+MQTT_ONLINEVALUE = "Online"
 
 BEDROOM_VALUE = "bedroom"
 OFFICE_VALUE = "office"
@@ -89,9 +93,6 @@ def on_message(client, userdata, message):
 
 
 def whitenoise_message_response_action(room, message):
-    global last_time_status_check_in
-    last_time_status_check_in = time.monotonic()
-
     if str(message.payload.decode("utf-8")) == ON_VALUE:
         turnOnWhiteNoise(room, showPrint=True)
         client.publish(MQTT_GETON_PATH.format(room), ON_VALUE)
@@ -103,7 +104,14 @@ def whitenoise_message_response_action(room, message):
         with open(PICKLE_FILE_LOCATION, 'wb') as datafile:
             pickle.dump(white_noise_is_on_state, datafile)
             print("saved whitenoise state")
-    except Exception:
+    except pickle.UnpicklingError as e:
+        print(e)
+        pass
+    except (AttributeError, EOFError, ImportError, IndexError) as e:
+        print(e)
+        pass
+    except Exception as e:
+        print(e)
         pass
 
 
@@ -121,33 +129,45 @@ def turnOnWhiteNoise(room, showPrint=False):
     global white_noise_is_on_state
 
     white_noise_is_on_state[room] = True
-
-    if room == OWENSROOM_VALUE:
-        sonos_control.sonos_whitenoise_start(sonos_mapping[room], 60)
-    else:
-        sonos_control.sonos_whitenoise_start(sonos_mapping[room])
+    sonos_control.sonos_whitenoise_start(sonos_mapping[room])
 
     if showPrint:
         print(f"turning {room} whitenoise ON ....")
 
 
-def update_status_action(speaker, room):
-    if sonos_control.sonos_whitenoise_is_on(speaker):
+#  def update_status_action(speaker, room):
+#     if sonos_control.sonos_whitenoise_is_on(speaker):
+#         client.publish(MQTT_GETON_PATH.format(room), ON_VALUE)
+#     else:
+#         client.publish(MQTT_GETON_PATH.format(room), OFF_VALUE)
+
+
+def check_state_to_resume_on(room):
+    global white_noise_is_on_state
+
+    if white_noise_is_on_state[room] is True:
+        turnOnWhiteNoise(room)
         client.publish(MQTT_GETON_PATH.format(room), ON_VALUE)
-    else:
-        client.publish(MQTT_GETON_PATH.format(room), OFF_VALUE)
 
 
-def update_status():
-    global last_time_status_check_in
+def startup_resume_saved_state_action():
+    check_state_to_resume_on(BEDROOM_VALUE)
+    check_state_to_resume_on(OFFICE_VALUE)
+    check_state_to_resume_on(OWENSROOM_VALUE)
+    check_state_to_resume_on(LIVINGROOM_VALUE)
+    check_state_to_resume_on(BASEMENT_VALUE)
 
-    update_status_action(sonos_control.SONOS_BEDROOM, BEDROOM_VALUE)
-    update_status_action(sonos_control.SONOS_OFFICE, OFFICE_VALUE)
-    update_status_action(sonos_control.SONOS_OWENS_ROOM, OWENSROOM_VALUE)
-    update_status_action(sonos_control.SONOS_LIVINGROOM, LIVINGROOM_VALUE)
-    update_status_action(sonos_control.SONOS_BASEMENT, BASEMENT_VALUE)
 
-    last_time_status_check_in = time.monotonic()
+# def update_status():
+#     global last_time_status_check_in
+
+#     update_status_action(sonos_control.SONOS_BEDROOM, BEDROOM_VALUE)
+#     update_status_action(sonos_control.SONOS_OFFICE, OFFICE_VALUE)
+#     update_status_action(sonos_control.SONOS_OWENS_ROOM, OWENSROOM_VALUE)
+#     update_status_action(sonos_control.SONOS_LIVINGROOM, LIVINGROOM_VALUE)
+#     update_status_action(sonos_control.SONOS_BASEMENT, BASEMENT_VALUE)
+
+#     last_time_status_check_in = time.monotonic()
 
 
 if __name__ == '__main__':
@@ -160,6 +180,12 @@ if __name__ == '__main__':
     except (FileNotFoundError, pickle.UnpicklingError):
         print("failed to load whitenoise state, default=OFF")
         pass
+    except (AttributeError, EOFError, ImportError, IndexError) as e:
+        print(e)
+        pass
+    except Exception as e:
+        print(e)
+        pass
 
     # for each dictionary item
     # if true, call whitenoise on
@@ -171,11 +197,11 @@ if __name__ == '__main__':
 
     client.connect(MQTT_HOST, MQTT_PORT, 60)
 
-    update_status()
-
     client.loop_start()
     # see below, not sure if sleep is needed here, probably not
     time.sleep(0.001)
+
+    startup_resume_saved_state_action()
 
     while not exit_monitor.exit_now_flag_raised:
         # added time.sleep 1 ms after seeing 100% CPU usage
@@ -183,7 +209,12 @@ if __name__ == '__main__':
         time.sleep(0.001)
         current_seconds_count = time.monotonic()
         if current_seconds_count - last_time_status_check_in > status_checkin_delay:
-            update_status()
+            last_time_status_check_in = current_seconds_count
+            client.publish(MQTT_GETONLINE_PATH.format(BEDROOM_VALUE), MQTT_ONLINEVALUE)
+            client.publish(MQTT_GETONLINE_PATH.format(OFFICE_VALUE), MQTT_ONLINEVALUE)
+            client.publish(MQTT_GETONLINE_PATH.format(OWENSROOM_VALUE), MQTT_ONLINEVALUE)
+            client.publish(MQTT_GETONLINE_PATH.format(LIVINGROOM_VALUE), MQTT_ONLINEVALUE)
+            client.publish(MQTT_GETONLINE_PATH.format(BASEMENT_VALUE), MQTT_ONLINEVALUE)
 
     client.loop_stop()
     client.disconnect()

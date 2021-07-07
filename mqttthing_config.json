@@ -4,10 +4,13 @@
         "name": "Owen's White Noise",
         "topics": {
             "getOn": "home/owensroom/switches/whitenoise/getOn",
-            "setOn": "home/owensroom/switches/whitenoise/setOn"
+            "setOn": "home/owensroom/switches/whitenoise/setOn",
+            "getOnline": "home/owensroom/switches/whitenoise/getOnline"
         },
-        "confirmationPeriodms": 1000,
-        "confirmationIndicateOffline": true,
+        "onlineValue": "Online",
+        "offlineValue": "Offline",
+        "confirmationPeriodms": 10000,
+        "confirmationIndicateOffline": false,
         "integerValue": false,
         "onValue": "ON",
         "offValue": "OFF",
@@ -18,10 +21,13 @@
         "name": "Bedroom White Noise",
         "topics": {
             "getOn": "home/bedroom/switches/whitenoise/getOn",
-            "setOn": "home/bedroom/switches/whitenoise/setOn"
+            "setOn": "home/bedroom/switches/whitenoise/setOn",
+            "getOnline": "home/bedroom/switches/whitenoise/getOnline"
         },
-        "confirmationPeriodms": 1000,
-        "confirmationIndicateOffline": true,
+        "onlineValue": "Online",
+        "offlineValue": "Offline",
+        "confirmationPeriodms": 10000,
+        "confirmationIndicateOffline": false,
         "integerValue": false,
         "onValue": "ON",
         "offValue": "OFF",
@@ -32,10 +38,13 @@
         "name": "Office White Noise",
         "topics": {
             "getOn": "home/office/switches/whitenoise/getOn",
-            "setOn": "home/office/switches/whitenoise/setOn"
+            "setOn": "home/office/switches/whitenoise/setOn",
+            "getOnline": "home/office/switches/whitenoise/getOnline"
         },
-        "confirmationPeriodms": 1000,
-        "confirmationIndicateOffline": true,
+        "onlineValue": "Online",
+        "offlineValue": "Offline",
+        "confirmationPeriodms": 10000,
+        "confirmationIndicateOffline": false,
         "integerValue": false,
         "onValue": "ON",
         "offValue": "OFF",
@@ -46,10 +55,13 @@
         "name": "Living Room White Noise",
         "topics": {
             "getOn": "home/livingroom/switches/whitenoise/getOn",
-            "setOn": "home/livingroom/switches/whitenoise/setOn"
+            "setOn": "home/livingroom/switches/whitenoise/setOn",
+            "getOnline": "home/livingroom/switches/whitenoise/getOnline"
         },
-        "confirmationPeriodms": 1000,
-        "confirmationIndicateOffline": true,
+        "onlineValue": "Online",
+        "offlineValue": "Offline",
+        "confirmationPeriodms": 10000,
+        "confirmationIndicateOffline": false,
         "integerValue": false,
         "onValue": "ON",
         "offValue": "OFF",
@@ -60,14 +72,16 @@
         "name": "Downstairs White Noise",
         "topics": {
             "getOn": "home/basement/switches/whitenoise/getOn",
-            "setOn": "home/basement/switches/whitenoise/setOn"
+            "setOn": "home/basement/switches/whitenoise/setOn",
+            "getOnline": "home/basement/switches/whitenoise/getOnline"
         },
-        "confirmationPeriodms": 1000,
-        "confirmationIndicateOffline": true,
+        "onlineValue": "Online",
+        "offlineValue": "Offline",
+        "confirmationPeriodms": 10000,
+        "confirmationIndicateOffline": false,
         "integerValue": false,
         "onValue": "ON",
         "offValue": "OFF",
         "accessory": "mqttthing"
     }
-
 ]

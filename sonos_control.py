@@ -1,4 +1,7 @@
 import os
+import sys
+import time
+
 import requests
 
 # jishi / node-sonos-http-api
@@ -21,7 +24,8 @@ def sonos_api_call(action, url):
     try:
         r = requests.get(url)
         json = r.json()
-    except:
+    except Exception:
+        print(sys.exc_info()[0])
         pass
     return json
 
@@ -33,13 +37,15 @@ def sonos_whitenoise_is_on(sonos_player):
             return True
         else:
             return False
-    except:
+    except Exception:
+        print(sys.exc_info()[0])
         return False
 
 
 def sonos_whitenoise_start(speaker, volume=40):
     sonos_api_call(f"[{speaker}] pause", f"{SONOS_API_URL}/{speaker}/pause")
     sonos_api_call(f"[{speaker}] ungroup", f"{SONOS_API_URL}/{speaker}/leave")
+    time.sleep(2)
     sonos_api_call(f"[{speaker}] set volume", f"{SONOS_API_URL}/{speaker}/volume/{volume}")
     sonos_api_call(f"[{speaker}] unmute", f"{SONOS_API_URL}/{speaker}/unmute")
     sonos_api_call(f"[{speaker}] start Sleep playlist", f"{SONOS_API_URL}/{speaker}/playlist/Sleep")
