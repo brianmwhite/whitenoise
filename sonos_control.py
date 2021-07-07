@@ -3,6 +3,7 @@ import sys
 import time
 
 import requests
+import requests.exceptions
 
 # jishi / node-sonos-http-api
 # https://github.com/jishi/node-sonos-http-api
@@ -21,13 +22,25 @@ WHITE_NOISE_TRACK_TITLE = "Beach with Cross Fade"
 
 def sonos_api_call(action, url):
     json = "{}"
-    try:
-        r = requests.get(url)
-        json = r.json()
-    except Exception:
-        print(sys.exc_info()[0])
-        pass
+    # try:
+    r = requests.get(url)
+    json = r.json()
+    if check_for_error(json):
+        raise requests.exceptions.ConnectionError("Sonos speaker is offline")
+    # except Exception:
+        # print(sys.exc_info()[0])
+        # pass
     return json
+
+
+def check_for_error(json_response):
+    error = False
+    if json_response["status"] == "error":
+        error = True
+        print(json_response["error"])
+        if str(json_response["error"]).startswith("") == "connect EHOSTUNREACH":
+            print("Sonos speaker is offline")
+    return error
 
 
 def sonos_whitenoise_is_on(sonos_player):
@@ -40,6 +53,12 @@ def sonos_whitenoise_is_on(sonos_player):
     except Exception:
         print(sys.exc_info()[0])
         return False
+
+# {
+#     "status": "error",
+#     "error": "connect EHOSTUNREACH 192.168.7.168:1400",
+#     "stack": "Error: connect EHOSTUNREACH 192.168.7.168:1400\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1138:16)"
+# }
 
 
 def sonos_whitenoise_start(speaker, volume=40):
