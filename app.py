@@ -147,7 +147,7 @@ def check_state_to_resume_on(room):
     global white_noise_is_on_state
 
     if white_noise_is_on_state[room] is True:
-        client.publish(MQTT_SETON_PATH.format(room), ON_VALUE)
+        turnOnWhiteNoise(room)
 
 
 def startup_resume_saved_state_action():

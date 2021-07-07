@@ -13,6 +13,6 @@ services:
       MQTT_PORT: ${MQTT_PORT}
     restart: always
     volumes:
-      - type: volume
+      - type: bind
         source: ./config
         target: /app/config
