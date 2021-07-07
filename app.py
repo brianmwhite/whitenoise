@@ -165,8 +165,9 @@ if __name__ == '__main__':
         with open(PICKLE_FILE_LOCATION, 'rb') as datafile:
             white_noise_is_on_state = pickle.load(datafile)
             print("loaded whitenoise state")
-    except (FileNotFoundError, pickle.UnpicklingError):
+    except (FileNotFoundError, pickle.UnpicklingError) as err:
         print("failed to load whitenoise state, default=OFF")
+        print(err)
         pass
     except (AttributeError, EOFError, ImportError, IndexError) as e:
         print(e)
