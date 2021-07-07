@@ -11,7 +11,7 @@ import sonos_control
 last_time_status_check_in = 0
 status_checkin_delay = 60.0
 
-PICKLE_FILE_LOCATION = "whitenoise.pickle"
+PICKLE_FILE_LOCATION = "config/whitenoise.pickle"
 
 MQTT_HOST = os.environ["MQTT_HOST"]
 MQTT_PORT = int(os.environ["MQTT_PORT"])
@@ -147,8 +147,7 @@ def check_state_to_resume_on(room):
     global white_noise_is_on_state
 
     if white_noise_is_on_state[room] is True:
-        turnOnWhiteNoise(room)
-        client.publish(MQTT_GETON_PATH.format(room), ON_VALUE)
+        client.publish(MQTT_SETON_PATH.format(room), ON_VALUE)
 
 
 def startup_resume_saved_state_action():
