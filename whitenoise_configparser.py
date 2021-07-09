@@ -1,5 +1,7 @@
-from collections import namedtuple
-Speaker = namedtuple('Speaker', 'mqtt_speaker_name sonos_speaker_name is_speaker_on')
+class Speaker:
+    mqtt_speaker_name = ""
+    sonos_speaker_name = ""
+    is_speaker_on = False
 
 
 def get_speakers_from_config_section(config_section):
@@ -10,7 +12,10 @@ def get_speakers_from_config_section(config_section):
 
         mqtt_speaker_name = config_line_parts[0].strip()
         sonos_speaker_name = config_line_parts[1].strip()
-        speaker_default_is_speaker_on = False
 
-        speaker_collection[mqtt_speaker_name] = Speaker(mqtt_speaker_name, sonos_speaker_name, speaker_default_is_speaker_on)
+        speaker = Speaker()
+        speaker.mqtt_speaker_name = mqtt_speaker_name
+        speaker.sonos_speaker_name = sonos_speaker_name
+
+        speaker_collection[mqtt_speaker_name] = speaker
     return speaker_collection
