@@ -11,7 +11,7 @@ import sonos_control
 import whitenoise_configparser
 
 config = configparser.ConfigParser()
-config.read('./config/config.ini')
+config.read('config/config.ini')
 
 config_settings = config['SETTINGS']
 config_speakers_section = config['SPEAKERS']
@@ -126,10 +126,10 @@ def turnOffWhiteNoise(mqtt_speaker_name, showPrint=False):
 def startup_resume_saved_state_action(saved_speaker_state):
     for key, speaker in saved_speaker_state.items():
         if speaker.is_speaker_on is True:
-            print(f"turning {key} speaker on after restart")
+            print(f"{key} = ON")
             turnOnWhiteNoise(speaker.mqtt_speaker_name)
         else:
-            print(f"whitenoise on {key} was off before restart")
+            print(f"{key} = OFF")
 
 
 if __name__ == '__main__':
