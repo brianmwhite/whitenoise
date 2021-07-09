@@ -14,9 +14,6 @@ def sonos_api_call(action, url):
     json = r.json()
     if check_for_error(json):
         raise requests.exceptions.ConnectionError("Sonos speaker is offline")
-    # except Exception:
-        # print(sys.exc_info()[0])
-        # pass
     return json
 
 
@@ -57,9 +54,3 @@ def sonos_whitenoise_stop(sonos_api_url, speaker, volume=20):
 #     except Exception:
 #         print(sys.exc_info()[0])
 #         return False
-
-# {
-#     "status": "error",
-#     "error": "connect EHOSTUNREACH 192.168.7.168:1400",
-#     "stack": "Error: connect EHOSTUNREACH 192.168.7.168:1400\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1138:16)"
-# }
