@@ -18,15 +18,15 @@ config_speakers_section = config['SPEAKERS']
 speaker_collection = whitenoise_configparser.get_speakers_from_config_section(config_speakers_section)
 
 SONOS_API_URL = config_settings.get("SONOS_API_URL")
-SONOS_PLAYLIST_NAME = config.settings.get("SONOS_PLAYLIST_NAME")
+SONOS_PLAYLIST_NAME = config_settings.get("SONOS_PLAYLIST_NAME")
 
 last_time_status_check_in = 0
-status_checkin_delay = config_settings.get("STATUS_CHECKIN_DELAY")
+status_checkin_delay = config_settings.getfloat("STATUS_CHECKIN_DELAY")
 
 PICKLE_FILE_LOCATION = config_settings.get("PICKLE_FILE_LOCATION")
 
 MQTT_HOST = config_settings.get("MQTT_HOST")
-MQTT_PORT = config_settings.get("MQTT_PORT")
+MQTT_PORT = config_settings.getint("MQTT_PORT")
 
 MQTT_SETON_PATH = config_settings.get("MQTT_SETON_PATH")
 MQTT_SETON_PATH_REGEX = re.compile(MQTT_SETON_PATH.replace("/", "\\/").replace("{0}", "(\\w+)"))
@@ -134,6 +134,8 @@ def startup_resume_saved_state_action(saved_speaker_state):
 
 if __name__ == '__main__':
     exit_monitor = exit_monitor_setup()
+
+    saved_speaker_state = {}
 
     try:
         with open(PICKLE_FILE_LOCATION, 'rb') as datafile:
