@@ -25,7 +25,7 @@ if [ "$(git rev-parse HEAD)" != "$(git rev-parse @\{u\})" ]; then
     # git reset --hard origin/master
 
     echo "building docker image"
-    docker build . --tag $SERVICENAME --tag $SERVICENAME:v$DATESTAMP
+    docker build . --tag $SERVICENAME --tag $SERVICENAME:v"$DATESTAMP"
 
     echo "stopping $SERVICENAME"
     docker-compose down
