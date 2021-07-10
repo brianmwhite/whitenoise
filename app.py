@@ -196,6 +196,7 @@ if __name__ == '__main__':
     time.sleep(0.001)
 
     whitenoise_speakers_offline = check_saved_state_for_resuming(saved_speaker_state)
+    print(f"speakers to resume => {whitenoise_speakers_offline}")
 
     # for first run make it so the last time status check in is always larger than the delay
     last_time_status_check_in = -1 * status_checkin_delay
@@ -206,7 +207,10 @@ if __name__ == '__main__':
         time.sleep(0.001)
         current_seconds_count = time.monotonic()
         if current_seconds_count - last_time_status_check_in > status_checkin_delay:
+            print("start online and resume checkin")
             last_time_status_check_in = current_seconds_count
+            
+            print(f"speakers to resume => {whitenoise_speakers_offline}")
             
             if len(whitenoise_speakers_offline) > 0 and RETRY_RESUME_ATTEMPT_COUNT < RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT:
                 whitenoise_speakers_offline = resume_speakers_that_were_offline(whitenoise_speakers_offline)
