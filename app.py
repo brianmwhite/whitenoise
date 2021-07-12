@@ -102,7 +102,12 @@ def turnOnWhiteNoise(mqtt_speaker_name, showPrint=False):
     success = False
 
     try:
-        sonos_control.sonos_whitenoise_start(SONOS_API_URL, SONOS_PLAYLIST_NAME, speaker_collection[mqtt_speaker_name].sonos_speaker_name)
+        sonos_control.sonos_whitenoise_start(
+            SONOS_API_URL,
+            SONOS_PLAYLIST_NAME,
+            speaker_collection[mqtt_speaker_name].sonos_speaker_name,
+            speaker_collection[mqtt_speaker_name].volume_on)
+
         speaker_collection[mqtt_speaker_name].is_speaker_on = True
         client.publish(MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_ON_VALUE)
         success = True
@@ -121,7 +126,11 @@ def turnOffWhiteNoise(mqtt_speaker_name, showPrint=False):
     success = False
 
     try:
-        sonos_control.sonos_whitenoise_stop(SONOS_API_URL, speaker_collection[mqtt_speaker_name].sonos_speaker_name)
+        sonos_control.sonos_whitenoise_stop(
+            SONOS_API_URL,
+            speaker_collection[mqtt_speaker_name].sonos_speaker_name,
+            speaker_collection[mqtt_speaker_name].volume_off)
+
         speaker_collection[mqtt_speaker_name].is_speaker_on = False
         client.publish(MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_OFF_VALUE)
         success = True
@@ -160,7 +169,7 @@ def resume_speakers_that_were_offline(speakers_to_check_again):
     speaker_indexes_to_clear.sort(reverse=True)
     for index in speaker_indexes_to_clear:
         del speakers_to_check_again[index]
-    
+
     return speakers_to_check_again
 
 
@@ -209,16 +218,16 @@ if __name__ == '__main__':
         if current_seconds_count - last_time_status_check_in > status_checkin_delay:
             print("start online and resume checkin")
             last_time_status_check_in = current_seconds_count
-            
+
             print(f"speakers to resume => {whitenoise_speakers_offline}")
-            
+
             if len(whitenoise_speakers_offline) > 0 and RETRY_RESUME_ATTEMPT_COUNT < RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT:
                 whitenoise_speakers_offline = resume_speakers_that_were_offline(whitenoise_speakers_offline)
                 RETRY_RESUME_ATTEMPT_COUNT += 1
             else:
                 whitenoise_speakers_offline = []
                 RETRY_RESUME_ATTEMPT_COUNT = 0
-            
+
             for key, speaker in speaker_collection.items():
                 client.publish(MQTT_GETONLINE_PATH.format(speaker.mqtt_speaker_name), MQTT_ONLINEVALUE)
 
