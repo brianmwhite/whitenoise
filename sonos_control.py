@@ -39,6 +39,8 @@ def sonos_whitenoise_start(sonos_api_url, playlist_name, speaker, volume=40):
     sonos_api_call(f"[{speaker}] set volume", f"{sonos_api_url}/{speaker}/volume/{volume}")
     sonos_api_call(f"[{speaker}] unmute", f"{sonos_api_url}/{speaker}/unmute")
     sonos_api_call(f"[{speaker}] start {playlist_name} playlist", f"{sonos_api_url}/{speaker}/playlist/{playlist_name}")
+    time.sleep(1)
+    sonos_api_call(f"[{speaker}] play", f"{sonos_api_url}/{speaker}/play")
 
 
 def sonos_whitenoise_stop(sonos_api_url, speaker, volume=20):
