@@ -215,11 +215,11 @@ if __name__ == '__main__':
         # found this solution https://stackoverflow.com/a/41749754
         time.sleep(0.001)
         current_seconds_count = time.monotonic()
-        if (current_seconds_count - last_time_status_check_in) > last_time_status_check_in:
+        if (current_seconds_count - last_time_status_check_in) > status_checkin_delay:
             
             print(f"current_seconds_count={current_seconds_count}")
             print(f"last_time_status_check_in={last_time_status_check_in}")
-            print(f"last_time_status_check_in={last_time_status_check_in}")
+            print(f"status_checkin_delay={status_checkin_delay}")
             
             print("start online and resume checkin")
             last_time_status_check_in = current_seconds_count
