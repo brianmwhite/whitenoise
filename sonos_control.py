@@ -20,7 +20,10 @@ def sonos_api_call(action, url):
 def check_for_error(json_response):
     error = False
     if json_response["status"] == "error":
-        if str(json_response["error"]).startswith("") == "Got status 500 when invoking /MediaRenderer/AVTransport/Control":
+        if (
+            str(json_response["error"]).startswith("")
+            == "Got status 500 when invoking /MediaRenderer/AVTransport/Control"
+        ):
             print(json_response["error"])
         elif str(json_response["error"]).startswith("") == "connect EHOSTUNREACH":
             error = True
@@ -36,22 +39,34 @@ def sonos_whitenoise_start(sonos_api_url, playlist_name, speaker, volume=40):
     sonos_api_call(f"[{speaker}] pause", f"{sonos_api_url}/{speaker}/pause")
     sonos_api_call(f"[{speaker}] ungroup", f"{sonos_api_url}/{speaker}/leave")
     time.sleep(2)
-    sonos_api_call(f"[{speaker}] set volume", f"{sonos_api_url}/{speaker}/volume/{volume}")
+    sonos_api_call(
+        f"[{speaker}] set volume", f"{sonos_api_url}/{speaker}/volume/{volume}"
+    )
     sonos_api_call(f"[{speaker}] unmute", f"{sonos_api_url}/{speaker}/unmute")
-    sonos_api_call(f"[{speaker}] start {playlist_name} playlist", f"{sonos_api_url}/{speaker}/playlist/{playlist_name}")
+    sonos_api_call(
+        f"[{speaker}] start {playlist_name} playlist",
+        f"{sonos_api_url}/{speaker}/playlist/{playlist_name}",
+    )
     time.sleep(1)
     sonos_api_call(f"[{speaker}] play", f"{sonos_api_url}/{speaker}/play")
 
 
 def sonos_whitenoise_stop(sonos_api_url, speaker, volume=20):
     sonos_api_call(f"[{speaker}] pause", f"{sonos_api_url}/{speaker}/pause")
-    sonos_api_call(f"[{speaker}] set volume", f"{sonos_api_url}/{speaker}/volume/{volume}")
+    sonos_api_call(
+        f"[{speaker}] set volume", f"{sonos_api_url}/{speaker}/volume/{volume}"
+    )
 
 
 # def sonos_whitenoise_is_on(sonos_player):
 #     try:
-#         json = sonos_api_call(f"[{sonos_player}] get state", f"{SONOS_API_URL}/{sonos_player}/state")
-#         if json["playbackState"] == "PLAYING" and json["currentTrack"]["title"] == WHITE_NOISE_TRACK_TITLE:
+#         json = sonos_api_call(
+#             f"[{sonos_player}] get state", f"{SONOS_API_URL}/{sonos_player}/state"
+#         )
+#         if (
+#             json["playbackState"] == "PLAYING"
+#             and json["currentTrack"]["title"] == WHITE_NOISE_TRACK_TITLE
+#         ):
 #             return True
 #         else:
 #             return False

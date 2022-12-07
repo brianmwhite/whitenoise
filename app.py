@@ -11,18 +11,22 @@ import sonos_control
 import whitenoise_configparser
 
 config = configparser.ConfigParser()
-config.read('config/config.ini')
+config.read("config/config.ini")
 
-config_settings = config['SETTINGS']
-config_speakers_section = config['SPEAKERS']
-speaker_collection = whitenoise_configparser.get_speakers_from_config_section(config_speakers_section)
+config_settings = config["SETTINGS"]
+config_speakers_section = config["SPEAKERS"]
+speaker_collection = whitenoise_configparser.get_speakers_from_config_section(
+    config_speakers_section
+)
 
 SONOS_API_URL = config_settings.get("SONOS_API_URL")
 SONOS_PLAYLIST_NAME = config_settings.get("SONOS_PLAYLIST_NAME")
 
 last_time_status_check_in = 0
 status_checkin_delay = config_settings.getfloat("STATUS_CHECKIN_DELAY")
-RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT = config_settings.getint("RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT")
+RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT = config_settings.getint(
+    "RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT"
+)
 RETRY_RESUME_ATTEMPT_COUNT = 0
 
 PICKLE_FILE_LOCATION = config_settings.get("PICKLE_FILE_LOCATION")
@@ -31,7 +35,9 @@ MQTT_HOST = config_settings.get("MQTT_HOST")
 MQTT_PORT = config_settings.getint("MQTT_PORT")
 
 MQTT_SETON_PATH = config_settings.get("MQTT_SETON_PATH")
-MQTT_SETON_PATH_REGEX = re.compile(MQTT_SETON_PATH.replace("/", "\\/").replace("{0}", "(\\w+)"))
+MQTT_SETON_PATH_REGEX = re.compile(
+    MQTT_SETON_PATH.replace("/", "\\/").replace("{0}", "(\\w+)")
+)
 
 MQTT_GETON_PATH = config_settings.get("MQTT_GETON_PATH")
 MQTT_GETONLINE_PATH = config_settings.get("MQTT_GETONLINE_PATH")
@@ -83,7 +89,7 @@ def on_message(client, userdata, message):
             turnOffWhiteNoise(mqtt_speaker_name, showPrint=True)
 
         try:
-            with open(PICKLE_FILE_LOCATION, 'wb') as datafile:
+            with open(PICKLE_FILE_LOCATION, "wb") as datafile:
                 pickle.dump(speaker_collection, datafile)
                 print("saved whitenoise state")
         except pickle.UnpicklingError as e:
@@ -106,7 +112,8 @@ def turnOnWhiteNoise(mqtt_speaker_name, showPrint=False):
             SONOS_API_URL,
             SONOS_PLAYLIST_NAME,
             speaker_collection[mqtt_speaker_name].sonos_speaker_name,
-            speaker_collection[mqtt_speaker_name].volume_on)
+            speaker_collection[mqtt_speaker_name].volume_on,
+        )
 
         speaker_collection[mqtt_speaker_name].is_speaker_on = True
         client.publish(MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_ON_VALUE)
@@ -129,7 +136,8 @@ def turnOffWhiteNoise(mqtt_speaker_name, showPrint=False):
         sonos_control.sonos_whitenoise_stop(
             SONOS_API_URL,
             speaker_collection[mqtt_speaker_name].sonos_speaker_name,
-            speaker_collection[mqtt_speaker_name].volume_off)
+            speaker_collection[mqtt_speaker_name].volume_off,
+        )
 
         speaker_collection[mqtt_speaker_name].is_speaker_on = False
         client.publish(MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_OFF_VALUE)
@@ -173,13 +181,13 @@ def resume_speakers_that_were_offline(speakers_to_check_again):
     return speakers_to_check_again
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit_monitor = exit_monitor_setup()
 
     saved_speaker_state = {}
 
     try:
-        with open(PICKLE_FILE_LOCATION, 'rb') as datafile:
+        with open(PICKLE_FILE_LOCATION, "rb") as datafile:
             saved_speaker_state = pickle.load(datafile)
             print("loaded whitenoise state")
     except (FileNotFoundError, pickle.UnpicklingError) as err:
@@ -207,7 +215,8 @@ if __name__ == '__main__':
     whitenoise_speakers_offline = check_saved_state_for_resuming(saved_speaker_state)
     print(f"speakers to resume => {whitenoise_speakers_offline}")
 
-    # for first run make it so the last time status check in is always larger than the delay
+    # for first run make it so the last time status check in
+    #  is always larger than the delay
     last_time_status_check_in = -1 * status_checkin_delay
 
     while not exit_monitor.exit_now_flag_raised:
@@ -216,25 +225,33 @@ if __name__ == '__main__':
         time.sleep(0.001)
         current_seconds_count = time.monotonic()
         if (current_seconds_count - last_time_status_check_in) > status_checkin_delay:
-            
+
             print(f"current_seconds_count={current_seconds_count}")
             print(f"last_time_status_check_in={last_time_status_check_in}")
             print(f"status_checkin_delay={status_checkin_delay}")
-            
+
             print("start online and resume checkin")
             last_time_status_check_in = current_seconds_count
 
             print(f"speakers to resume => {whitenoise_speakers_offline}")
 
-            if len(whitenoise_speakers_offline) > 0 and RETRY_RESUME_ATTEMPT_COUNT < RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT:
-                whitenoise_speakers_offline = resume_speakers_that_were_offline(whitenoise_speakers_offline)
+            if (
+                len(whitenoise_speakers_offline) > 0
+                and RETRY_RESUME_ATTEMPT_COUNT < RETRY_RESUME_ON_RESTART_ATTEMPT_LIMIT
+            ):
+                whitenoise_speakers_offline = resume_speakers_that_were_offline(
+                    whitenoise_speakers_offline
+                )
                 RETRY_RESUME_ATTEMPT_COUNT += 1
             else:
                 whitenoise_speakers_offline = []
                 RETRY_RESUME_ATTEMPT_COUNT = 0
 
             for key, speaker in speaker_collection.items():
-                client.publish(MQTT_GETONLINE_PATH.format(speaker.mqtt_speaker_name), MQTT_ONLINEVALUE)
+                client.publish(
+                    MQTT_GETONLINE_PATH.format(speaker.mqtt_speaker_name),
+                    MQTT_ONLINEVALUE,
+                )
 
     client.loop_stop()
     client.disconnect()
