@@ -14,13 +14,15 @@ def sonos_api_call(action, url):
     json = r.json()
     if check_for_error(json):
         raise requests.exceptions.ConnectionError("Sonos speaker is offline")
-        # print("Sonos speaker is offline")
     return json
 
 
 def check_for_error(json_response):
     error = False
     if json_response["status"] == "error":
+        # could instead check to see the player state is before blindly
+        # calling specific methods like pause
+        # pause will throw an error if the player has no queue
         if str(json_response["error"]).startswith(
             "Got status 500 when invoking /MediaRenderer/AVTransport/Control"
         ):
@@ -36,6 +38,7 @@ def check_for_error(json_response):
 
 
 def sonos_whitenoise_start(sonos_api_url, playlist_name, speaker, volume=40):
+    # pause will throw an error if the player has no queue
     sonos_api_call(f"[{speaker}] pause", f"{sonos_api_url}/{speaker}/pause")
     sonos_api_call(f"[{speaker}] ungroup", f"{sonos_api_url}/{speaker}/leave")
     time.sleep(2)
