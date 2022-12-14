@@ -68,6 +68,10 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("$SYS/#")
 
     # subscribe to all topics that match the pattern
+    # a plus sign indicates a wildcard and is must be the only thing between
+    # the separators /+/
+    # for example this is ok: home/whitenoise/+/set
+    # this is not ok: home/whitenoise+/set
     client.subscribe(MQTT_SETON_PATH.format("+"))
 
 

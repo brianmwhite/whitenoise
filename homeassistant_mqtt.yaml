@@ -1,0 +1,27 @@
+mqtt:
+  switch:
+    - unique_id: whitenoise-owensroom-switch
+      name: "Whitenoise Owen's Room"
+      state_topic: "homeassistant/switch/whitenoise/owensroom"
+      command_topic: "homeassistant/switch/whitenoise/owensroom/set"
+      availability_topic: "homeassistant/switch/whitenoise/owensroom/available"
+    - unique_id: whitenoise-bedroom-switch
+      name: "Whitenoise Bedroom"
+      state_topic: "homeassistant/switch/whitenoise/bedroom"
+      command_topic: "homeassistant/switch/whitenoise/bedroom/set"
+      availability_topic: "homeassistant/switch/whitenoise/bedroom/available"
+    - unique_id: whitenoise-livingroom-switch
+      name: "Whitenoise Living Room"
+      state_topic: "homeassistant/switch/whitenoise/livingroom"
+      command_topic: "homeassistant/switch/whitenoise/livingroom/set"
+      availability_topic: "homeassistant/switch/whitenoise/livingroom/available"
+    - unique_id: whitenoise-office-switch
+      name: "Whitenoise Office"
+      state_topic: "homeassistant/switch/whitenoise/office"
+      command_topic: "homeassistant/switch/whitenoise/office/set"
+      availability_topic: "homeassistant/switch/whitenoise/office/available"
+    - unique_id: whitenoise-basement-switch
+      name: "Whitenoise Downstairs"
+      state_topic: "homeassistant/switch/whitenoise/basement"
+      command_topic: "homeassistant/switch/whitenoise/basement/set"
+      availability_topic: "homeassistant/switch/whitenoise/basement/available"
