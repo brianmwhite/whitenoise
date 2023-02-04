@@ -120,7 +120,9 @@ def turnOnWhiteNoise(mqtt_speaker_name, showPrint=False):
         )
 
         speaker_collection[mqtt_speaker_name].is_speaker_on = True
-        client.publish(MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_ON_VALUE)
+        client.publish(
+            MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_ON_VALUE, retain=True
+        )
         success = True
     except requests.exceptions.ConnectionError as ce:
         print(ce)
@@ -144,7 +146,9 @@ def turnOffWhiteNoise(mqtt_speaker_name, showPrint=False):
         )
 
         speaker_collection[mqtt_speaker_name].is_speaker_on = False
-        client.publish(MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_OFF_VALUE)
+        client.publish(
+            MQTT_GETON_PATH.format(mqtt_speaker_name), MQTT_OFF_VALUE, retain=True
+        )
         success = True
     except requests.exceptions.ConnectionError as ce:
         print(ce)
@@ -253,7 +257,7 @@ if __name__ == "__main__":
 
             for key, speaker in speaker_collection.items():
                 client.publish(
-                    MQTT_GETONLINE_PATH.format(speaker.mqtt_speaker_name),
+                    MQTT_GETONLINE_PATH.format(speaker.mqtt_speaker_name, retain=True),
                     MQTT_ONLINEVALUE,
                 )
 
