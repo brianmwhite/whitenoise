@@ -98,13 +98,10 @@ def on_message(client, userdata, message):
                 print("saved whitenoise state")
         except pickle.UnpicklingError as e:
             print(e)
-            pass
         except (AttributeError, EOFError, ImportError, IndexError) as e:
             print(e)
-            pass
         except Exception as e:
             print(e)
-            pass
 
 
 def turnOnWhiteNoise(mqtt_speaker_name, showPrint=False):
@@ -126,6 +123,9 @@ def turnOnWhiteNoise(mqtt_speaker_name, showPrint=False):
         success = True
     except requests.exceptions.ConnectionError as ce:
         print(ce)
+        success = False
+    except Exception as e:
+        print(e)
         success = False
 
     if showPrint:
@@ -153,6 +153,10 @@ def turnOffWhiteNoise(mqtt_speaker_name, showPrint=False):
     except requests.exceptions.ConnectionError as ce:
         print(ce)
         success = False
+    except Exception as e:
+        print(e)
+        success = False
+
 
     if showPrint:
         print(f"turning {mqtt_speaker_name} whitenoise OFF ....")

@@ -19,20 +19,27 @@ def sonos_api_call(action, url):
 
 def check_for_error(json_response):
     error = False
-    if json_response["status"] == "error":
-        # could instead check to see the player state is before blindly
-        # calling specific methods like pause
-        # pause will throw an error if the player has no queue
-        if str(json_response["error"]).startswith(
-            "Got status 500 when invoking /MediaRenderer/AVTransport/Control"
-        ):
-            print(json_response["error"])
-        elif str(json_response["error"]).startswith("connect EHOSTUNREACH"):
-            error = True
-            print("Sonos speaker is offline")
-        else:
-            error = True
-            print(json_response)
+    # also check if json response is not empty
+    if not json_response:
+        error = True
+        print("Empty JSON error response")
+    else:
+        status = json_response.get("status")
+        error_message = json_response.get("error")
+        if status and status == "error":
+            # could instead check to see the player state is before blindly
+            # calling specific methods like pause
+            # pause will throw an error if the player has no queue
+            if error_message and str(error_message).startswith(
+                "Got status 500 when invoking /MediaRenderer/AVTransport/Control"
+            ):
+                print(error_message)
+            elif error_message and str(error).startswith("connect EHOSTUNREACH"):
+                error = True
+                print("Sonos speaker is offline")
+            else:
+                error = True
+                print(json_response)
 
     return error
 
